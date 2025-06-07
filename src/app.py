@@ -1,9 +1,8 @@
 from locust import HttpUser, between, task, TaskSet
-from locust.exception import StopUser
 import threading
 
 TARGET_HOST = "http://127.0.0.1:8000"
-TOTAL_REQUESTS = 100
+TOTAL_REQUESTS = 200
 request_counter = 0
 counter_lock = threading.Lock()
 
@@ -17,7 +16,7 @@ class CounterTasks(TaskSet):
         with counter_lock:
             if request_counter >= TOTAL_REQUESTS:
                 print(request_counter)
-                raise StopUser
+                return  # StopUser 대신 return 사용!
             request_counter += 1
 
         self.client.post("/api/counter/")
@@ -26,6 +25,3 @@ class CounterTasks(TaskSet):
 class CounterUserWithTaskSet(HttpUser):
     host = TARGET_HOST
     tasks = [CounterTasks]
-
-    def on_stop(self):
-        exit(0)
